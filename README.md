@@ -140,7 +140,7 @@ Add arguments:/c powershell -NoExit -File C:\Temp\HelloWorld.ps1
 http://yourip:1234/activewindow
 ```
 
-### Send a simpe message
+### Send a simple message
 ```
 http://yourip:1234/sendmessage?message=HelloWorld
 ```
