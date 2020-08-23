@@ -135,6 +135,16 @@ Add arguments:/c powershell -NoExit Set-ExecutionPolicy -Scope CurrentUser -Exec
 Browse for: cmd.exe 
 Add arguments:/c powershell -NoExit -File C:\Temp\HelloWorld.ps1
 ```
+### Get current display window
+```
+http://yourip:1234/activewindow
+```
+
+### Send a simpe message
+```
+http://yourip:1234/sendmessage?message=HelloWorld
+```
+
 
 ### A word on security.
 Some might see this program as a major security risk and while that might be true in some cases users should be aware of their environment.
