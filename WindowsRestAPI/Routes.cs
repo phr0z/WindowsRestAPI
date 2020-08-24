@@ -17,6 +17,7 @@ using WindowsRestAPI.Properties;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Windows.Forms;
+using System.Linq;
 
 namespace WindowsRestAPI
 {
@@ -26,11 +27,11 @@ namespace WindowsRestAPI
         [RestRoute(HttpMethod = HttpMethod.GET, PathInfo = "/display")]
         public IHttpContext SetMonitor(IHttpContext context)
         {
-            responseMessage response = new responseMessage();
+            ResponseMessage Response = new ResponseMessage();
             int sNumber;
-            response.message = "Please input windows display number.";
-            response.successful = false;
-            var monitor = context.Request.QueryString["primary"] ?? JsonConvert.SerializeObject(response);
+            Response.Message = "Please input windows display number.";
+            Response.Successful = false;
+            var monitor = context.Request.QueryString["primary"] ?? JsonConvert.SerializeObject(Response);
             try
             {
                 sNumber = Convert.ToInt16(monitor);
@@ -52,57 +53,62 @@ namespace WindowsRestAPI
             }
             catch (Exception)
             {
-                response.message = "Are you using a number as input?";
-                response.successful = false;
-                context.Response.SendResponse(JsonConvert.SerializeObject(response));
+                Response.Message = "Are you using a number as input?";
+                Response.Successful = false;
+                context.Response.SendResponse(JsonConvert.SerializeObject(Response));
                 return context;
             }
 
-            response.message = $"Setting #{sNumber} as primary display.";
-            response.successful = true;
-            context.Response.SendResponse(JsonConvert.SerializeObject(response));
+            Response.Message = $"Setting #{sNumber} as primary display.";
+            Response.Successful = true;
+            context.Response.SendResponse(JsonConvert.SerializeObject(Response));
             return context;
         }
 
         [RestRoute(HttpMethod = HttpMethod.GET, PathInfo = "/getid")]
         public IHttpContext GetSound(IHttpContext context)
         {
-            responseMessage response = new responseMessage();
-            response.message = "Something went wrong.";
-            response.successful = false;
-            List<soundDeviceInfo> sd = new List<soundDeviceInfo>();
+            SoundDevices sd = new SoundDevices();
             var enumerator = new MMDeviceEnumerator();
 
             foreach (var wasapi in enumerator.EnumerateAudioEndPoints(DataFlow.All, DeviceState.Active))
             {
                 try
                 {
-                    soundDeviceInfo sdi = new soundDeviceInfo();
-                    sdi.ID = wasapi.ID;
-                    sdi.FriendlyName = wasapi.FriendlyName;
-                    sdi.State = wasapi.State.ToString();
-                    sd.Add(sdi);
-                    response.message = "Successfully got active audio device(s).";
-                    response.successful = true;
+                    sd.SoundDevice.Add(new SoundDeviceInfo
+                    {
+                        ID = wasapi.ID,
+                        FriendlyName = wasapi.FriendlyName,
+                        State = wasapi.State.ToString()
+                    });
+
+                    sd.Response = new ResponseMessage
+                    {
+                        Message = "Successfully got active audio device(s).",
+                        Successful = true
+                    };
                 }
                 catch (Exception)
                 {
-                    //avoid null exceptions
-                    response.successful = false;
+                    sd.Response = new ResponseMessage
+                    {
+                        Message = "Failed to get audio device(s).",
+                        Successful = false
+                    };
                 }
             }
 
-            context.Response.SendResponse(JsonConvert.SerializeObject(sd) + JsonConvert.SerializeObject(response));
+            context.Response.SendResponse(JsonConvert.SerializeObject(sd));
             return context;
         }
 
         [RestRoute(HttpMethod = HttpMethod.GET, PathInfo = "/set")]
         public IHttpContext SetSound(IHttpContext context)
         {
-            responseMessage response = new responseMessage();
-            response.message = "Please input correct id or name. Get id by using /getid";
-            response.successful = false;
-            var id = context.Request.QueryString["id"] ?? JsonConvert.SerializeObject(response);
+            ResponseMessage Response = new ResponseMessage();
+            Response.Message = "Please input correct id or name. Get id by using /getid";
+            Response.Successful = false;
+            var id = context.Request.QueryString["id"] ?? JsonConvert.SerializeObject(Response);
             
             var enumerator = new MMDeviceEnumerator();
             bool changeResult = false;
@@ -120,35 +126,35 @@ namespace WindowsRestAPI
                         DeviceFullInfo device = new DeviceFullInfo(wasapi.FriendlyName, wasapi.ID, wasapi.DataFlow, wasapi.IconPath, wasapi.State);
                         DeviceCyclerManager manager = new DeviceCyclerManager();
                         changeResult = manager.SetAsDefault(device);
-                        response.message = $"Switched to audio device: {wasapi.FriendlyName}";
+                        Response.Message = $"Switched to audio device: {wasapi.FriendlyName}";
                     }
                     else if (wasapi_device_name == device_name)
                     {
                         DeviceFullInfo device = new DeviceFullInfo(wasapi.FriendlyName, wasapi.ID, wasapi.DataFlow, wasapi.IconPath, wasapi.State);
                         DeviceCyclerManager manager = new DeviceCyclerManager();
                         changeResult = manager.SetAsDefault(device);
-                        response.message = $"Switched to audio device: {wasapi.FriendlyName}";
+                        Response.Message = $"Switched to audio device: {wasapi.FriendlyName}";
                     }
                 }
                 catch (Exception e)
                 {
-                    response.message = $"Failed to switch to audio device by name: {id}. Try using ID instead. {e}";
+                    Response.Message = $"Failed to switch to audio device by name: {id}. Try using ID instead. {e}";
                     continue;
                 }
             }
 
-            response.successful = changeResult;
-            context.Response.SendResponse(JsonConvert.SerializeObject(response));
+            Response.Successful = changeResult;
+            context.Response.SendResponse(JsonConvert.SerializeObject(Response));
             return context;
         }
 
         [RestRoute(HttpMethod = HttpMethod.GET, PathInfo = "/run")]
         public IHttpContext RunCommand(IHttpContext context)
         {
-            responseMessage response = new responseMessage();
-            response.message = "Please input a correct value.";
-            response.successful = false;
-            var name = context.Request.QueryString["name"] ?? JsonConvert.SerializeObject(response);
+            ResponseMessage Response = new ResponseMessage();
+            Response.Message = "Please input a correct value.";
+            Response.Successful = false;
+            var name = context.Request.QueryString["name"] ?? JsonConvert.SerializeObject(Response);
 
             Commands command = new Commands();
 
@@ -169,22 +175,21 @@ namespace WindowsRestAPI
                         process.StartInfo.Arguments = appArguments;
                     }
                     process.Start();
-                    response.message = $"Successfully launched application. {appName}";
-                    response.successful = true;
+                    Response.Message = $"Successfully launched application. {appName}";
+                    Response.Successful = true;
                 }
             }
-            context.Response.SendResponse(JsonConvert.SerializeObject(response));
+            context.Response.SendResponse(JsonConvert.SerializeObject(Response));
             return context;
         }
 
         [RestRoute(HttpMethod = HttpMethod.GET, PathInfo = "/stop")]
         public IHttpContext StopProcess(IHttpContext context)
         {
-            List<responseMessage> responseList = new List<responseMessage>();
-            responseMessage response = new responseMessage();
-            response.message = "Please input a correct value.";
-            response.successful = false;
-            var name = context.Request.QueryString["name"] ?? JsonConvert.SerializeObject(response);
+            ResponseMessage Response = new ResponseMessage();
+            Response.Message = "Please input a correct value.";
+            Response.Successful = false;
+            var name = context.Request.QueryString["name"] ?? JsonConvert.SerializeObject(Response);
 
             Commands command = new Commands();
 
@@ -207,33 +212,21 @@ namespace WindowsRestAPI
                             try 
                             {
                                 p.Kill();
-                                response.message = $"Successfully stopped process. {p.ProcessName}";
-                                response.successful = true;
-                                responseList.Add(response);
+                                Response.Message = $"Successfully stopped process. {p.ProcessName}";
+                                Response.Successful = true;
                             }
                             catch (Exception e) 
                             {
-                                response.message = $"Failed to stop process. {p.ProcessName} " + e.Message.ToString();
-                                response.successful = false;
-                                responseList.Add(response);
+                                Response.Message = $"Failed to stop process. {p.ProcessName} " + e.Message.ToString();
+                                Response.Successful = false;
                             }
                         } 
                     }
                 }
             }
-            if (responseList.Count == 0)
-            {
-                response.message = $"Couldn't find any process with name {name}";
-                response.successful = false;
-                responseList.Add(response);
-                context.Response.SendResponse(JsonConvert.SerializeObject(responseList));
-                return context;
-            }
-            else 
-            {
-                context.Response.SendResponse(JsonConvert.SerializeObject(responseList));
-                return context;
-            }
+ 
+            context.Response.SendResponse(JsonConvert.SerializeObject(Response));
+            return context;
         }
         [RestRoute(HttpMethod = HttpMethod.GET, PathInfo = "/activewindow")]
         public IHttpContext ActiveWindow(IHttpContext context)
@@ -244,16 +237,12 @@ namespace WindowsRestAPI
             [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
             static extern int GetWindowText(IntPtr hWnd, StringBuilder text, int count);
 
-            [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]            
+            [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
             static extern int GetWindowTextLength(IntPtr hWnd);
-         
+
             Process[] process = Process.GetProcesses();
 
             ActiveWindow activeWindow = new ActiveWindow();
-
-            responseMessage response = new responseMessage();
-            responseMessage response2 = new responseMessage();
-            List<responseMessage> responseList = new List<responseMessage>();
 
             var strTitle = string.Empty;
             var handle = GetForegroundWindow();
@@ -263,72 +252,110 @@ namespace WindowsRestAPI
             if (GetWindowText(handle, stringBuilder, intLength) > 0)
             {
                 activeWindow.WindowName = stringBuilder.ToString();
-                response.message = "windowname";
-                response.successful = true;
             }
             else
             {
                 activeWindow.WindowName = null;
-                response.message = "windowname";
-                response.successful = false;
             }
 
-            responseList.Add(response);
-
-            foreach(Process p in process)
+            foreach (Process p in process)
             {
                 if (p.MainWindowTitle.Contains(activeWindow.WindowName))
                 {
                     activeWindow.ProcessName = p.ProcessName;
                     activeWindow.StartTime = p.StartTime.ToString();
-                    response2.message = "processname";
-                    response2.successful = true;
+                    activeWindow.Response = new ResponseMessage
+                    {
+                        Message = "Successfully found window.",
+                        Successful = true
+                    };
                     break;
                 }
                 else
                 {
                     activeWindow.ProcessName = null;
                     activeWindow.StartTime = null;
-                    response2.message = "processname";
-                    response2.successful = false;
+                    activeWindow.Response = new ResponseMessage
+                    {
+                        Message = "Failed to find window.",
+                        Successful = false
+                    };
                 }
             }
-            
-            responseList.Add(response2);
 
-            context.Response.SendResponse(JsonConvert.SerializeObject(activeWindow) + JsonConvert.SerializeObject(responseList));
+            context.Response.SendResponse(JsonConvert.SerializeObject(activeWindow));
             return context;
         }
         [RestRoute(HttpMethod = HttpMethod.GET, PathInfo = "/sendmessage")]
         public IHttpContext SendMessage(IHttpContext context)
         {
-            responseMessage response = new responseMessage();
-            response.message = "Failed to parse message.";
-            response.successful = false;
-            var message = context.Request.QueryString["message"] ?? JsonConvert.SerializeObject(response);
+            ResponseMessage Response = new ResponseMessage();
+            Response.Message = "Failed to parse message.";
+            Response.Successful = false;
+            var message = context.Request.QueryString["message"] ?? JsonConvert.SerializeObject(Response);
 
             if (message != null || message.Length > 0)
             {
-                response.message = message;
-                response.successful = true;
+                Response.Message = message;
+                Response.Successful = true;
                 MessageBox.Show(message, "WindowsRestAPI", MessageBoxButtons.OK, MessageBoxIcon.Information, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly);
             }
             else
             {
-                response.message = "Failed to parse message.";
-                response.successful = false;
+                Response.Message = "Failed to parse message.";
+                Response.Successful = false;
             }
 
-            context.Response.SendResponse(JsonConvert.SerializeObject(response));
+            context.Response.SendResponse(JsonConvert.SerializeObject(Response));
+            return context;
+        }
+        [RestRoute(HttpMethod = HttpMethod.GET, PathInfo = "/getprocesses")]
+        public IHttpContext GetProcesses(IHttpContext context)
+        {
+            Processes Processes = new Processes();
+            Process[] process = Process.GetProcesses();
+            foreach (Process p in process)
+            {
+                try
+                {
+                    Processes.Process.Add(
+                    new ProcessInfo
+                    {
+                        ProcessName = p.ProcessName,
+                        StartTime = p.StartTime.ToString()
+                    });
+                }
+                catch (Exception)
+                {
+                    // where priveleges arent sufficient.
+                }
+            }
+            if(Processes.Process.Count > 0)
+            {
+                Processes.Response = new ResponseMessage
+                {
+                    Message = "Successfully got processes.",
+                    Successful = true
+                };
+            }
+            else
+            {
+                Processes.Response = new ResponseMessage
+                {
+                    Message = "Failed to get processes.",
+                    Successful = false
+                };
+            }
+            context.Response.SendResponse(JsonConvert.SerializeObject(Processes));
             return context;
         }
         [RestRoute]
         public IHttpContext Main(IHttpContext context)
         {
-            responseMessage response = new responseMessage();
-            response.message = "Welcome to Windows Rest API.";
-            response.successful = true;
-            context.Response.SendResponse(JsonConvert.SerializeObject(response));
+            ResponseMessage Response = new ResponseMessage();
+            Response.Message = "Welcome to Windows Rest API.";
+            Response.Successful = true;
+            context.Response.SendResponse(JsonConvert.SerializeObject(Response));
             return context;
         }
     }

@@ -139,7 +139,6 @@
     <Compile Include="MonitorChanger.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ResponseMessage.cs" />
     <Compile Include="Routes.cs" />
     <Compile Include="Commands.cs" />
     <Compile Include="Settings.cs" />
@@ -149,7 +148,6 @@
     <Compile Include="Config.Designer.cs">
       <DependentUpon>Config.cs</DependentUpon>
     </Compile>
-    <Compile Include="SoundDeviceInfo.cs" />
     <EmbeddedResource Include="AddCommand.resx">
       <DependentUpon>AddCommand.cs</DependentUpon>
     </EmbeddedResource>

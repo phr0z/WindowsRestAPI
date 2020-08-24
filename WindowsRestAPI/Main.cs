@@ -48,9 +48,12 @@ namespace WindowsRestAPI
                 }
             }
             catch (Exception error)
-            {
-                MessageBox.Show(error.ToString());
-                Application.Exit();
+            {               
+                DialogResult result = MessageBox.Show(error.ToString(), "Unexpected error.", MessageBoxButtons.OKCancel, MessageBoxIcon.Error);
+                if (result == DialogResult.OK)
+                {
+                    Application.Exit();
+                }
             }
         }
 
