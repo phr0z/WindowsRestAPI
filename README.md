@@ -145,6 +145,11 @@ http://yourip:1234/activewindow
 http://yourip:1234/sendmessage?message=HelloWorld
 ```
 
+### Get running processes
+```
+http://yourip:1234/getprocesses
+Note: It will not allow you to stop/terminate processes not defined in your Run Commands list.
+```
 
 ### A word on security.
 Some might see this program as a major security risk and while that might be true in some cases users should be aware of their environment.
