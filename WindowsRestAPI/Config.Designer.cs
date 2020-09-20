@@ -40,6 +40,9 @@
             this.btnAddRun = new System.Windows.Forms.Button();
             this.numPort = new System.Windows.Forms.NumericUpDown();
             this.btnRemove = new System.Windows.Forms.Button();
+            this.rdoMessageBox = new System.Windows.Forms.RadioButton();
+            this.rdoNotificationCenter = new System.Windows.Forms.RadioButton();
+            this.label1 = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.numPort)).BeginInit();
             this.SuspendLayout();
             // 
@@ -162,6 +165,37 @@
             this.btnRemove.UseVisualStyleBackColor = true;
             this.btnRemove.Click += new System.EventHandler(this.btnRemove_Click);
             // 
+            // rdoMessageBox
+            // 
+            this.rdoMessageBox.AutoSize = true;
+            this.rdoMessageBox.Location = new System.Drawing.Point(12, 154);
+            this.rdoMessageBox.Name = "rdoMessageBox";
+            this.rdoMessageBox.Size = new System.Drawing.Size(128, 17);
+            this.rdoMessageBox.TabIndex = 12;
+            this.rdoMessageBox.Text = "Simple MessageBox";
+            this.rdoMessageBox.UseVisualStyleBackColor = true;
+            // 
+            // rdoNotificationCenter
+            // 
+            this.rdoNotificationCenter.AutoSize = true;
+            this.rdoNotificationCenter.Checked = true;
+            this.rdoNotificationCenter.Location = new System.Drawing.Point(11, 178);
+            this.rdoNotificationCenter.Name = "rdoNotificationCenter";
+            this.rdoNotificationCenter.Size = new System.Drawing.Size(121, 17);
+            this.rdoNotificationCenter.TabIndex = 13;
+            this.rdoNotificationCenter.TabStop = true;
+            this.rdoNotificationCenter.Text = "Notification Center";
+            this.rdoNotificationCenter.UseVisualStyleBackColor = true;
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(61, 128);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(79, 13);
+            this.label1.TabIndex = 14;
+            this.label1.Text = "Message Type";
+            // 
             // Config
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -169,6 +203,9 @@
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(50)))), ((int)(((byte)(50)))), ((int)(((byte)(60)))));
             this.ClientSize = new System.Drawing.Size(654, 283);
             this.ControlBox = false;
+            this.Controls.Add(this.label1);
+            this.Controls.Add(this.rdoNotificationCenter);
+            this.Controls.Add(this.rdoMessageBox);
             this.Controls.Add(this.btnRemove);
             this.Controls.Add(this.numPort);
             this.Controls.Add(this.btnAddRun);
@@ -206,5 +243,8 @@
         private System.Windows.Forms.Button btnAddRun;
         private System.Windows.Forms.NumericUpDown numPort;
         private System.Windows.Forms.Button btnRemove;
+        private System.Windows.Forms.RadioButton rdoMessageBox;
+        private System.Windows.Forms.RadioButton rdoNotificationCenter;
+        private System.Windows.Forms.Label label1;
     }
 }

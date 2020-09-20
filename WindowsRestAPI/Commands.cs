@@ -1,7 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-
+using System.Reflection;
 
 namespace WindowsRestAPI
 {
@@ -13,11 +14,28 @@ namespace WindowsRestAPI
     }
     class Commands
     {
+        public static void CopyCommands()
+        {
+            //https://techcommunity.microsoft.com/t5/windows-dev-appconsult/msix-how-to-copy-data-outside-the-installation-folder-during-the/ba-p/1133602
+            string result = Assembly.GetExecutingAssembly().Location;
+            int index = result.LastIndexOf("\\");
+            string commands = $"{result.Substring(0, index)}\\commands.config";
+
+            string destinationPath = $"{Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData)}\\WindowsRestAPI\\commands.config";
+            string destinationFolder = $"{Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData)}\\WindowsRestAPI\\";
+
+            if (!File.Exists(destinationPath))
+            {
+                Directory.CreateDirectory(destinationFolder);
+                File.Copy(commands, destinationPath, true);
+            }
+        }
         public List<string> GetCommands() 
         {
+            string commands = $"{Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData)}\\WindowsRestAPI\\commands.config";
             List<string> config = new List<string>();
             string folder = Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName);
-            StreamReader reader = new StreamReader(folder + "\\commands.config");
+            StreamReader reader = new StreamReader(commands);
             string[] c = reader.ReadToEnd().Trim().Split('\n');
             foreach(string s in c)
             {
@@ -31,11 +49,10 @@ namespace WindowsRestAPI
             }
             return config;
         }
-
         public void SaveCommands(List<string> commands)
         {
-            string folder = Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName);
-            StreamWriter writer = new StreamWriter(folder + "\\commands.config");
+            string cmds = $"{Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData)}\\WindowsRestAPI\\commands.config";
+            StreamWriter writer = new StreamWriter(cmds);
             foreach (string s in commands)
             {
                 writer.WriteLine(s.Trim());
@@ -43,7 +60,6 @@ namespace WindowsRestAPI
             writer.Close();
             writer.Dispose();
         }
-
         public void AddCommand(string name, string path, string arguments)
         {
             string command = "";
@@ -60,7 +76,6 @@ namespace WindowsRestAPI
             commands.Add(command.Trim());
             SaveCommands(commands);
         }
-
         public void RemoveCommand(string command)
         {
             List<string> commands = GetCommands();

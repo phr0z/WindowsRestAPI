@@ -52,6 +52,9 @@ namespace WindowsRestAPI
             Settings.Default.HostIP = txtHostIP.Text;
             Settings.Default.Port = numPort.Value.ToString();
 
+            Settings.Default.MessageBox = rdoMessageBox.Checked;
+            Settings.Default.NotificationCenter = rdoNotificationCenter.Checked;
+
             Settings.Default.Save();
             Close();
         }
@@ -64,6 +67,9 @@ namespace WindowsRestAPI
 
             chkStartMinimized.Checked = Settings.Default.StartMinimized;
             chkStartServer.Checked = Settings.Default.StartServer;
+
+            rdoMessageBox.Checked = Settings.Default.MessageBox;
+            rdoNotificationCenter.Checked = Settings.Default.NotificationCenter;
 
             txtHostIP.Text = Settings.Default.HostIP;
             numPort.Value = Convert.ToInt64(Settings.Default.Port);

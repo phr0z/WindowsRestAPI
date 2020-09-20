@@ -1,0 +1,68 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+
+<Package
+  xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10"
+  xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10"
+  xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities"
+  xmlns:com="http://schemas.microsoft.com/appx/manifest/com/windows10"
+  xmlns:desktop="http://schemas.microsoft.com/appx/manifest/desktop/windows10"
+  xmlns:iot="http://schemas.microsoft.com/appx/manifest/iot/windows10"
+  IgnorableNamespaces="uap rescap com desktop iot">
+
+  <Identity
+    Name="2636c1d3-005d-4a9d-b312-49a49658e71a"
+    Publisher="CN=WindowsRestAPI"
+    Version="1.1.0.0" />
+
+  <Properties>
+    <DisplayName>WindowsRestAPI</DisplayName>
+    <PublisherDisplayName>Skillz</PublisherDisplayName>
+    <Logo>Images\StoreLogo.png</Logo>
+  </Properties>
+
+  <Dependencies>
+    <TargetDeviceFamily Name="Windows.Universal" MinVersion="10.0.0.0" MaxVersionTested="10.0.0.0" />
+    <TargetDeviceFamily Name="Windows.Desktop" MinVersion="10.0.14393.0" MaxVersionTested="10.0.14393.0" />
+  </Dependencies>
+
+  <Resources>
+    <Resource Language="x-generate"/>
+  </Resources>
+
+  <Applications>
+    <Application Id="App"
+      Executable="$targetnametoken$.exe"
+      EntryPoint="$targetentrypoint$">
+      <uap:VisualElements
+        DisplayName="Windows Rest API"
+        BackgroundColor="transparent"
+        Square150x150Logo="Images\Square150x150Logo.png"
+        Square44x44Logo="Images\Square44x44Logo.png" Description="Rest API for Windows">
+        <uap:DefaultTile Wide310x150Logo="Images\Wide310x150Logo.png"  ShortName="WRAPI" Square71x71Logo="Images\SmallTile.png" Square310x310Logo="Images\LargeTile.png"/>
+        <uap:SplashScreen Image="Images\SplashScreen.png" />
+      </uap:VisualElements>
+		<Extensions>
+			<!--Register COM CLSID LocalServer32 registry key-->
+			<com:Extension Category="windows.comServer">
+				<com:ComServer>
+					<com:ExeServer Executable="WindowsRestAPI\WindowsRestAPI.exe" Arguments="-ToastActivated" DisplayName="Windows Rest API">
+						<com:Class Id="b11690b2-55a9-4339-a2ea-8ada1c99e203" DisplayName="Toast activator"/>
+					</com:ExeServer>
+				</com:ComServer>
+			</com:Extension>
+			<!--Specify which CLSID to activate when toast clicked-->
+			<desktop:Extension Category="windows.toastNotificationActivation">
+				<desktop:ToastNotificationActivation ToastActivatorCLSID="b11690b2-55a9-4339-a2ea-8ada1c99e203" />
+			</desktop:Extension>
+
+		</Extensions>
+    </Application>
+  </Applications>
+
+  <Capabilities>
+    <rescap:Capability Name="runFullTrust" />
+    <Capability Name="internetClient"/>
+    <Capability Name="internetClientServer"/>
+    <iot:Capability Name="systemManagement"/>
+  </Capabilities>
+</Package>

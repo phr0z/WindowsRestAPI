@@ -1,4 +1,5 @@
 ﻿using Grapevine.Server;
+using Microsoft.Toolkit.Uwp.Notifications;
 using System;
 using System.Drawing;
 using System.Windows.Forms;
@@ -25,6 +26,7 @@ namespace WindowsRestAPI
         public Main()
         {
             InitializeComponent();
+            DesktopNotificationManagerCompat.RegisterActivator<MyNotificationActivator.ThisNotificationActivator>();
         }
 
         public RestServer Rest;
@@ -74,6 +76,8 @@ namespace WindowsRestAPI
 
         private void Main_Load(object sender, EventArgs e)
         {
+            Commands.CopyCommands();
+
             if (Rest is null)
             {
                 setStoppedStatus();
@@ -155,5 +159,6 @@ namespace WindowsRestAPI
                 btnStartStop.FlatAppearance.MouseOverBackColor = Color.Green;
             }
         }
+    
     }
 }

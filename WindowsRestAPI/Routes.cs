@@ -9,21 +9,28 @@ using Grapevine.Interfaces.Server;
 using Grapevine.Server;
 using Grapevine.Server.Attributes;
 using Grapevine.Shared;
-using NAudio.CoreAudioApi;
 using Newtonsoft.Json;
-using SoundSwitch.Framework.Audio.Device;
-using SoundSwitch.Framework.DeviceCyclerManager;
 using WindowsRestAPI.Properties;
 using System.Runtime.InteropServices;
-using System.Text;
 using System.Windows.Forms;
 using System.Linq;
+using AudioSwitcher.AudioApi.CoreAudio;
+using NAudio.CoreAudioApi;
 
 namespace WindowsRestAPI
 {
     [RestResource]
     public class APIResource
     {
+        [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+        static extern IntPtr GetForegroundWindow();
+
+        [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+        static extern int GetWindowText(IntPtr hWnd, StringBuilder text, int count);
+
+        [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+        static extern int GetWindowTextLength(IntPtr hWnd);
+
         [RestRoute(HttpMethod = HttpMethod.GET, PathInfo = "/display")]
         public IHttpContext SetMonitor(IHttpContext context)
         {
@@ -69,17 +76,19 @@ namespace WindowsRestAPI
         public IHttpContext GetSound(IHttpContext context)
         {
             SoundDevices sd = new SoundDevices();
-            var enumerator = new MMDeviceEnumerator();
 
-            foreach (var wasapi in enumerator.EnumerateAudioEndPoints(DataFlow.All, DeviceState.Active))
+            CoreAudioController controller = new CoreAudioController();
+            var devices = controller.GetPlaybackDevices();
+
+            foreach(CoreAudioDevice device in devices)
             {
                 try
                 {
                     sd.SoundDevice.Add(new SoundDeviceInfo
                     {
-                        ID = wasapi.ID,
-                        FriendlyName = wasapi.FriendlyName,
-                        State = wasapi.State.ToString()
+                        ID = device.RealId,
+                        FriendlyName = device.FullName,
+                        State = device.State.ToString()
                     });
 
                     sd.Response = new ResponseMessage
@@ -110,40 +119,57 @@ namespace WindowsRestAPI
             Response.Successful = false;
             var id = context.Request.QueryString["id"] ?? JsonConvert.SerializeObject(Response);
             
-            var enumerator = new MMDeviceEnumerator();
-            bool changeResult = false;
+            CoreAudioController controller = new CoreAudioController();
+            var devices = controller.GetDevices();
 
-            foreach (var wasapi in enumerator.EnumerateAudioEndPoints(DataFlow.All, DeviceState.Active))
+            foreach(CoreAudioDevice d in devices)
             {
-
-                string wasapi_device_name = Regex.Replace(wasapi.FriendlyName, @"[^\u0041-\u007A]", string.Empty);
-                string device_name = Regex.Replace(id, @"[^\u0041-\u007A]", string.Empty);
-
-                try
+                if (d.RealId == id)
                 {
-                    if (wasapi.ID == id)
-                    {
-                        DeviceFullInfo device = new DeviceFullInfo(wasapi.FriendlyName, wasapi.ID, wasapi.DataFlow, wasapi.IconPath, wasapi.State);
-                        DeviceCyclerManager manager = new DeviceCyclerManager();
-                        changeResult = manager.SetAsDefault(device);
-                        Response.Message = $"Switched to audio device: {wasapi.FriendlyName}";
-                    }
-                    else if (wasapi_device_name == device_name)
-                    {
-                        DeviceFullInfo device = new DeviceFullInfo(wasapi.FriendlyName, wasapi.ID, wasapi.DataFlow, wasapi.IconPath, wasapi.State);
-                        DeviceCyclerManager manager = new DeviceCyclerManager();
-                        changeResult = manager.SetAsDefault(device);
-                        Response.Message = $"Switched to audio device: {wasapi.FriendlyName}";
-                    }
+                    controller.SetDefaultDevice(devices.Where(x => x.RealId == id).Single());
+                    Response.Message = $"Switched to audio device: {d.FullName}";
+                    Response.Successful = true;
                 }
-                catch (Exception e)
+                if(d.FullName == id)
                 {
-                    Response.Message = $"Failed to switch to audio device by name: {id}. Try using ID instead. {e}";
-                    continue;
+                    try
+                    {
+                        CoreAudioDevice device = devices.Where(x => x.FullName == id && x.DeviceType == AudioSwitcher.AudioApi.DeviceType.Playback).Single();
+                        controller.SetDefaultDevice(device);
+                        Response.Message = $"Switched to audio device: {d.FullName}";
+                        Response.Successful = true;
+                    }
+                    catch (Exception)
+                    {
+
+                    }
                 }
             }
 
-            Response.Successful = changeResult;
+            context.Response.SendResponse(JsonConvert.SerializeObject(Response));
+            return context;
+        }
+
+        [RestRoute(HttpMethod = HttpMethod.GET, PathInfo = "/volume")]
+        public IHttpContext SetVolume(IHttpContext context)
+        {
+            ResponseMessage Response = new ResponseMessage();
+            Response.Message = "Please input a correct numeric value.";
+            Response.Successful = false;
+            var volume = context.Request.QueryString["level"] ?? JsonConvert.SerializeObject(Response);
+
+            CoreAudioController controller = new CoreAudioController();
+            CoreAudioDevice device = controller.DefaultPlaybackDevice;
+            try
+            {
+                device.Volume = Convert.ToDouble(volume);
+                Response.Message = $"Successfully changed volume level to {volume}.";
+                Response.Successful = true;
+            }
+            catch (Exception e)
+            {
+
+            }
             context.Response.SendResponse(JsonConvert.SerializeObject(Response));
             return context;
         }
@@ -231,15 +257,6 @@ namespace WindowsRestAPI
         [RestRoute(HttpMethod = HttpMethod.GET, PathInfo = "/activewindow")]
         public IHttpContext ActiveWindow(IHttpContext context)
         {
-            [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
-            static extern IntPtr GetForegroundWindow();
-
-            [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
-            static extern int GetWindowText(IntPtr hWnd, StringBuilder text, int count);
-
-            [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
-            static extern int GetWindowTextLength(IntPtr hWnd);
-
             Process[] process = Process.GetProcesses();
 
             ActiveWindow activeWindow = new ActiveWindow();
@@ -294,11 +311,13 @@ namespace WindowsRestAPI
             Response.Successful = false;
             var message = context.Request.QueryString["message"] ?? JsonConvert.SerializeObject(Response);
 
+
             if (message != null || message.Length > 0)
             {
                 Response.Message = message;
                 Response.Successful = true;
-                MessageBox.Show(message, "WindowsRestAPI", MessageBoxButtons.OK, MessageBoxIcon.Information, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly);
+
+                Messages.Show(message);
             }
             else
             {

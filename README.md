@@ -16,6 +16,14 @@ A Windows Rest API app which allows you to control certain functions of Windows 
 - Not every exception is handled. Errors will occur and pop up.
 
 #### Installation guide.
+Add the program certificate to your local machine root certificate trust. This is needed for Windows Notification Center.
+
+Run "mmc" and add the certificate management snap-in. Select local computer.
+Import the ceritifcate into the trusted root ceritficate store.
+Run the installer Package_x.x.x.x_x64_.bundle
+
+Note: commands.config is now stored in %ProgramData% instead. (Copy it from previous location to restore it.)
+
 After installation you need to configure which IP and port number the program binds on.
 Default is localhost and 1234 which is allowed by any regular user. But it won't allow you to access it from outside of your own computer.
 
@@ -36,12 +44,15 @@ Once the reservation is set go to settings and change IP to  "+" and any port th
 
 
 #### Endpoints.
+- http://localhost:1234/activewindow : Gets the current active window title.
 - http://localhost:1234/getid : Gets ID of all active audio interfaces available. Use this ID to switch device.
+- http://localhost:1234/getprocesses : Returns a list with current running processes and their runtime.
 - http://localhost:1234/set?id={xxxxxxx}.{xxxxxx-xxxx-xxxx-xxx-xxxxxxxxx} : See above.
-- http://localhost:1234/set?id=audio%20device%20(name)
-- http://localhost:123/display?primary=(1-4) : Sets your primary display as identified by screen settings. (Limited at 4).
+- http://localhost:1234/set?id=audio%20device%20(name) : Try to set interface by name.
+- http://localhost:123/display?primary=(1-4) : Sets your primary display as identified by screen settings. (4).
 - http://localhost:1234/run?name=CMD : Runs the defined command as listed by name in settings.
 - http://localhost:1234/stop?name=CMD : Tries to terminate the defined command as listed by name in settings. (by process)
+- http://localhost:1234/volume?level=55,5 : Sets the volume level for the active audio interface.
 
 #### Home Assistant.
 Was one of the main reasons why i developed this program. So I could switch my primary devices when I for example wanted to play Steam on my living room TV.
@@ -135,6 +146,13 @@ Add arguments:/c powershell -NoExit Set-ExecutionPolicy -Scope CurrentUser -Exec
 Browse for: cmd.exe 
 Add arguments:/c powershell -NoExit -File C:\Temp\HelloWorld.ps1
 ```
+
+#### Command example #3: Run Windows Linux Subsystem (WSL) commands.
+```
+Browse for: cmd.exe 
+Add arguments:bash -c netstat -na
+```
+
 ### Get current display window
 ```
 http://yourip:1234/activewindow
@@ -145,10 +163,16 @@ http://yourip:1234/activewindow
 http://yourip:1234/sendmessage?message=HelloWorld
 ```
 
-### Get running processes
+### Configuring dynamic notifications from HA using input_text helper configuration.yaml example
 ```
-http://yourip:1234/getprocesses
-Note: It will not allow you to stop/terminate processes not defined in your Run Commands list.
+rest_command:
+  send_message:
+    url: "http://yourip:1234/sendmessage?message={{ states('input_text.windowsrestapi') }}"
+    method: GET
+    headers: 
+      accept: 'application/json, text/html'
+    content_type: 'application/json; charset=utf-8'
+    verify_ssl: false
 ```
 
 ### A word on security.
@@ -160,14 +184,11 @@ If neccessary create firewall rules between your client device and Windows compu
 Author of this program is in no form responsible of what might be the result of using this program.
 End user is solemnly responsible for what they choose to do with this program and author will not be held responsible.
 
-#### Compilation guide.
-This project requires SoundSwitch to compile properly. Add SoundSwitch to the solution and reference it.
-
 #### Third party.
-- SoundSwitch: https://github.com/Belphemur/SoundSwitch
 - NewtonSoft Json: https://github.com/JamesNK/Newtonsoft.Json
 - Grapevine: https://github.com/sukona/Grapevine
 - Home Assistant: https://github.com/home-assistant/home-assistant
+
 Thanks to these awesome developers!
 
 
