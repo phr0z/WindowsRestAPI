@@ -19,7 +19,7 @@ A Windows Rest API app which allows you to control certain functions of Windows 
 Add the program certificate to your local machine root certificate trust. This is needed for Windows Notification Center.
 
 Run "mmc" and add the certificate management snap-in. Select local computer.
-Import the ceritifcate into the trusted root ceritficate store.
+Import the certificate into the trusted root certificate store.
 Run the installer Package_x.x.x.x_x64_.bundle
 
 Note: commands.config is now stored in %ProgramData% instead. (Copy it from previous location to restore it.)
