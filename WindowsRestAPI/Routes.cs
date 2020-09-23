@@ -104,9 +104,11 @@ namespace WindowsRestAPI
                         Message = "Failed to get audio device(s).",
                         Successful = false
                     };
+                    controller.Dispose();
                 }
             }
 
+            controller.Dispose();
             context.Response.SendResponse(JsonConvert.SerializeObject(sd));
             return context;
         }
@@ -120,23 +122,22 @@ namespace WindowsRestAPI
             var id = context.Request.QueryString["id"] ?? JsonConvert.SerializeObject(Response);
             
             CoreAudioController controller = new CoreAudioController();
-            var devices = controller.GetDevices();
+            var devices = controller.GetPlaybackDevices();
 
-            foreach(CoreAudioDevice d in devices)
+            foreach(CoreAudioDevice device in devices)
             {
-                if (d.RealId == id)
+                if (device.RealId == id)
                 {
-                    controller.SetDefaultDevice(devices.Where(x => x.RealId == id).Single());
-                    Response.Message = $"Switched to audio device: {d.FullName}";
+                    controller.SetDefaultDevice(device);
+                    Response.Message = $"Switched to audio device: {device.FullName}";
                     Response.Successful = true;
                 }
-                if(d.FullName == id)
+                if(device.FullName == id && device.State == AudioSwitcher.AudioApi.DeviceState.Active)
                 {
                     try
                     {
-                        CoreAudioDevice device = devices.Where(x => x.FullName == id && x.DeviceType == AudioSwitcher.AudioApi.DeviceType.Playback).Single();
                         controller.SetDefaultDevice(device);
-                        Response.Message = $"Switched to audio device: {d.FullName}";
+                        Response.Message = $"Switched to audio device: {device.FullName}";
                         Response.Successful = true;
                     }
                     catch (Exception)
@@ -145,6 +146,8 @@ namespace WindowsRestAPI
                     }
                 }
             }
+
+            controller.Dispose();
 
             context.Response.SendResponse(JsonConvert.SerializeObject(Response));
             return context;
