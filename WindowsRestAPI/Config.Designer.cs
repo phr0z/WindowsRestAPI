@@ -43,6 +43,11 @@
             this.rdoMessageBox = new System.Windows.Forms.RadioButton();
             this.rdoNotificationCenter = new System.Windows.Forms.RadioButton();
             this.label1 = new System.Windows.Forms.Label();
+            this.label2 = new System.Windows.Forms.Label();
+            this.chkHTTPS = new System.Windows.Forms.CheckBox();
+            this.chkAuth = new System.Windows.Forms.CheckBox();
+            this.txtUsername = new System.Windows.Forms.TextBox();
+            this.txtPassword = new System.Windows.Forms.TextBox();
             ((System.ComponentModel.ISupportInitialize)(this.numPort)).BeginInit();
             this.SuspendLayout();
             // 
@@ -74,7 +79,7 @@
             this.lstConfig.FormattingEnabled = true;
             this.lstConfig.Location = new System.Drawing.Point(215, 25);
             this.lstConfig.Name = "lstConfig";
-            this.lstConfig.Size = new System.Drawing.Size(427, 247);
+            this.lstConfig.Size = new System.Drawing.Size(427, 390);
             this.lstConfig.TabIndex = 2;
             // 
             // txtHostIP
@@ -91,7 +96,7 @@
             // 
             this.btnSaveClose.FlatAppearance.BorderSize = 0;
             this.btnSaveClose.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnSaveClose.Location = new System.Drawing.Point(12, 253);
+            this.btnSaveClose.Location = new System.Drawing.Point(11, 390);
             this.btnSaveClose.Name = "btnSaveClose";
             this.btnSaveClose.Size = new System.Drawing.Size(100, 23);
             this.btnSaveClose.TabIndex = 5;
@@ -122,15 +127,15 @@
             this.lblRun.AutoSize = true;
             this.lblRun.Location = new System.Drawing.Point(384, 9);
             this.lblRun.Name = "lblRun";
-            this.lblRun.Size = new System.Drawing.Size(87, 13);
+            this.lblRun.Size = new System.Drawing.Size(65, 13);
             this.lblRun.TabIndex = 8;
-            this.lblRun.Text = "Run Commands";
+            this.lblRun.Text = "Commands";
             // 
             // btnAddRun
             // 
             this.btnAddRun.FlatAppearance.BorderSize = 0;
             this.btnAddRun.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnAddRun.Location = new System.Drawing.Point(118, 253);
+            this.btnAddRun.Location = new System.Drawing.Point(117, 390);
             this.btnAddRun.Name = "btnAddRun";
             this.btnAddRun.Size = new System.Drawing.Size(91, 23);
             this.btnAddRun.TabIndex = 9;
@@ -157,7 +162,7 @@
             // 
             this.btnRemove.FlatAppearance.BorderSize = 0;
             this.btnRemove.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnRemove.Location = new System.Drawing.Point(118, 223);
+            this.btnRemove.Location = new System.Drawing.Point(117, 360);
             this.btnRemove.Name = "btnRemove";
             this.btnRemove.Size = new System.Drawing.Size(91, 23);
             this.btnRemove.TabIndex = 11;
@@ -190,19 +195,75 @@
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(61, 128);
+            this.label1.Font = new System.Drawing.Font("Segoe UI", 8.25F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Underline))), System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label1.Location = new System.Drawing.Point(59, 129);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(79, 13);
+            this.label1.Size = new System.Drawing.Size(81, 13);
             this.label1.TabIndex = 14;
             this.label1.Text = "Message Type";
+            // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Font = new System.Drawing.Font("Segoe UI", 8.25F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Underline))), System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label2.Location = new System.Drawing.Point(42, 213);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(108, 13);
+            this.label2.TabIndex = 15;
+            this.label2.Text = "Authentication/SSL";
+            // 
+            // chkHTTPS
+            // 
+            this.chkHTTPS.AutoSize = true;
+            this.chkHTTPS.Location = new System.Drawing.Point(11, 240);
+            this.chkHTTPS.Name = "chkHTTPS";
+            this.chkHTTPS.Size = new System.Drawing.Size(58, 17);
+            this.chkHTTPS.TabIndex = 16;
+            this.chkHTTPS.Text = "HTTPS";
+            this.chkHTTPS.UseVisualStyleBackColor = true;
+            // 
+            // chkAuth
+            // 
+            this.chkAuth.AutoSize = true;
+            this.chkAuth.Location = new System.Drawing.Point(12, 263);
+            this.chkAuth.Name = "chkAuth";
+            this.chkAuth.Size = new System.Drawing.Size(189, 17);
+            this.chkAuth.TabIndex = 17;
+            this.chkAuth.Text = "Authentication (User/Pass):Basic";
+            this.chkAuth.UseVisualStyleBackColor = true;
+            // 
+            // txtUsername
+            // 
+            this.txtUsername.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(70)))), ((int)(((byte)(60)))), ((int)(((byte)(60)))));
+            this.txtUsername.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.txtUsername.ForeColor = System.Drawing.Color.White;
+            this.txtUsername.Location = new System.Drawing.Point(12, 295);
+            this.txtUsername.Name = "txtUsername";
+            this.txtUsername.Size = new System.Drawing.Size(183, 15);
+            this.txtUsername.TabIndex = 18;
+            // 
+            // txtPassword
+            // 
+            this.txtPassword.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(70)))), ((int)(((byte)(60)))), ((int)(((byte)(60)))));
+            this.txtPassword.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.txtPassword.ForeColor = System.Drawing.Color.White;
+            this.txtPassword.Location = new System.Drawing.Point(12, 324);
+            this.txtPassword.Name = "txtPassword";
+            this.txtPassword.Size = new System.Drawing.Size(183, 15);
+            this.txtPassword.TabIndex = 19;
             // 
             // Config
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(50)))), ((int)(((byte)(50)))), ((int)(((byte)(60)))));
-            this.ClientSize = new System.Drawing.Size(654, 283);
+            this.ClientSize = new System.Drawing.Size(654, 425);
             this.ControlBox = false;
+            this.Controls.Add(this.txtPassword);
+            this.Controls.Add(this.txtUsername);
+            this.Controls.Add(this.chkAuth);
+            this.Controls.Add(this.chkHTTPS);
+            this.Controls.Add(this.label2);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.rdoNotificationCenter);
             this.Controls.Add(this.rdoMessageBox);
@@ -246,5 +307,10 @@
         private System.Windows.Forms.RadioButton rdoMessageBox;
         private System.Windows.Forms.RadioButton rdoNotificationCenter;
         private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.CheckBox chkHTTPS;
+        private System.Windows.Forms.CheckBox chkAuth;
+        private System.Windows.Forms.TextBox txtUsername;
+        private System.Windows.Forms.TextBox txtPassword;
     }
 }

@@ -13,7 +13,7 @@ namespace WindowsRestAPI
     }
     public class ActiveWindow
     {
-        public string WindowName { get; set; }
+        public string WindowTitle { get; set; }
         public string ProcessName { get; set; }
         public string StartTime { get; set; }
         public ResponseMessage Response { get; set; }

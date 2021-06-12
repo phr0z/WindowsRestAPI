@@ -12,7 +12,7 @@
   <Identity
     Name="2636c1d3-005d-4a9d-b312-49a49658e71a"
     Publisher="CN=WindowsRestAPI"
-    Version="1.1.0.0" />
+    Version="1.2.0.0" />
 
   <Properties>
     <DisplayName>WindowsRestAPI</DisplayName>

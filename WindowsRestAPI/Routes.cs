@@ -16,12 +16,14 @@ using System.Windows.Forms;
 using System.Linq;
 using AudioSwitcher.AudioApi.CoreAudio;
 using NAudio.CoreAudioApi;
+using System.Net;
+using System.Reflection;
 
 namespace WindowsRestAPI
 {
     [RestResource]
     public class APIResource
-    {
+    {       
         [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
         static extern IntPtr GetForegroundWindow();
 
@@ -34,6 +36,12 @@ namespace WindowsRestAPI
         [RestRoute(HttpMethod = HttpMethod.GET, PathInfo = "/display")]
         public IHttpContext SetMonitor(IHttpContext context)
         {
+            if (Authentication.Enabled)
+            {
+                HttpListenerBasicIdentity identity = (HttpListenerBasicIdentity)context.User.Identity;
+                if (!Authentication.VerifyAuthentication(identity)) { context.Response.SendResponse(JsonConvert.SerializeObject(Authentication.FailedAuthentication)); return context; }
+            }
+
             ResponseMessage Response = new ResponseMessage();
             int sNumber;
             Response.Message = "Please input windows display number.";
@@ -68,6 +76,7 @@ namespace WindowsRestAPI
 
             Response.Message = $"Setting #{sNumber} as primary display.";
             Response.Successful = true;
+            context.Response.ContentEncoding = Encoding.Default;
             context.Response.SendResponse(JsonConvert.SerializeObject(Response));
             return context;
         }
@@ -75,12 +84,18 @@ namespace WindowsRestAPI
         [RestRoute(HttpMethod = HttpMethod.GET, PathInfo = "/getid")]
         public IHttpContext GetSound(IHttpContext context)
         {
+            if (Authentication.Enabled)
+            {
+                HttpListenerBasicIdentity identity = (HttpListenerBasicIdentity)context.User.Identity;
+                if (!Authentication.VerifyAuthentication(identity)) { context.Response.SendResponse(JsonConvert.SerializeObject(Authentication.FailedAuthentication)); return context; }
+            }
+
             SoundDevices sd = new SoundDevices();
 
             CoreAudioController controller = new CoreAudioController();
             var devices = controller.GetPlaybackDevices();
 
-            foreach(CoreAudioDevice device in devices)
+            foreach (CoreAudioDevice device in devices)
             {
                 try
                 {
@@ -109,6 +124,7 @@ namespace WindowsRestAPI
             }
 
             controller.Dispose();
+            context.Response.ContentEncoding = Encoding.Default;
             context.Response.SendResponse(JsonConvert.SerializeObject(sd));
             return context;
         }
@@ -116,10 +132,18 @@ namespace WindowsRestAPI
         [RestRoute(HttpMethod = HttpMethod.GET, PathInfo = "/set")]
         public IHttpContext SetSound(IHttpContext context)
         {
+            if (Authentication.Enabled)
+            {
+                HttpListenerBasicIdentity identity = (HttpListenerBasicIdentity)context.User.Identity;
+                if (!Authentication.VerifyAuthentication(identity)) { context.Response.SendResponse(JsonConvert.SerializeObject(Authentication.FailedAuthentication)); return context; }
+            }
+
             ResponseMessage Response = new ResponseMessage();
             Response.Message = "Please input correct id or name. Get id by using /getid";
             Response.Successful = false;
-            var id = context.Request.QueryString["id"] ?? JsonConvert.SerializeObject(Response);
+
+            var enc = Encoding.GetEncoding(context.Request.ContentEncoding.CodePage);
+            var id = Encoding.UTF8.GetString(enc.GetBytes(context.Request.QueryString["id"])) ?? JsonConvert.SerializeObject(Response);
             
             CoreAudioController controller = new CoreAudioController();
             var devices = controller.GetPlaybackDevices();
@@ -148,7 +172,7 @@ namespace WindowsRestAPI
             }
 
             controller.Dispose();
-
+            context.Response.ContentEncoding = Encoding.Default;
             context.Response.SendResponse(JsonConvert.SerializeObject(Response));
             return context;
         }
@@ -156,6 +180,12 @@ namespace WindowsRestAPI
         [RestRoute(HttpMethod = HttpMethod.GET, PathInfo = "/volume")]
         public IHttpContext SetVolume(IHttpContext context)
         {
+            if (Authentication.Enabled)
+            {
+                HttpListenerBasicIdentity identity = (HttpListenerBasicIdentity)context.User.Identity;
+                if (!Authentication.VerifyAuthentication(identity)) { context.Response.SendResponse(JsonConvert.SerializeObject(Authentication.FailedAuthentication)); return context; }
+            }
+
             ResponseMessage Response = new ResponseMessage();
             Response.Message = "Please input a correct numeric value.";
             Response.Successful = false;
@@ -173,6 +203,7 @@ namespace WindowsRestAPI
             {
 
             }
+            context.Response.ContentEncoding = Encoding.Default;
             context.Response.SendResponse(JsonConvert.SerializeObject(Response));
             return context;
         }
@@ -180,6 +211,12 @@ namespace WindowsRestAPI
         [RestRoute(HttpMethod = HttpMethod.GET, PathInfo = "/run")]
         public IHttpContext RunCommand(IHttpContext context)
         {
+            if (Authentication.Enabled)
+            {
+                HttpListenerBasicIdentity identity = (HttpListenerBasicIdentity)context.User.Identity;
+                if (!Authentication.VerifyAuthentication(identity)) { context.Response.SendResponse(JsonConvert.SerializeObject(Authentication.FailedAuthentication)); return context; }
+            }
+
             ResponseMessage Response = new ResponseMessage();
             Response.Message = "Please input a correct value.";
             Response.Successful = false;
@@ -208,6 +245,7 @@ namespace WindowsRestAPI
                     Response.Successful = true;
                 }
             }
+            context.Response.ContentEncoding = Encoding.Default;
             context.Response.SendResponse(JsonConvert.SerializeObject(Response));
             return context;
         }
@@ -215,6 +253,12 @@ namespace WindowsRestAPI
         [RestRoute(HttpMethod = HttpMethod.GET, PathInfo = "/stop")]
         public IHttpContext StopProcess(IHttpContext context)
         {
+            if (Authentication.Enabled)
+            {
+                HttpListenerBasicIdentity identity = (HttpListenerBasicIdentity)context.User.Identity;
+                if (!Authentication.VerifyAuthentication(identity)) { context.Response.SendResponse(JsonConvert.SerializeObject(Authentication.FailedAuthentication)); return context; }
+            }
+
             ResponseMessage Response = new ResponseMessage();
             Response.Message = "Please input a correct value.";
             Response.Successful = false;
@@ -253,13 +297,19 @@ namespace WindowsRestAPI
                     }
                 }
             }
- 
+            context.Response.ContentEncoding = Encoding.Default;
             context.Response.SendResponse(JsonConvert.SerializeObject(Response));
             return context;
         }
         [RestRoute(HttpMethod = HttpMethod.GET, PathInfo = "/activewindow")]
         public IHttpContext ActiveWindow(IHttpContext context)
         {
+            if (Authentication.Enabled)
+            {
+                HttpListenerBasicIdentity identity = (HttpListenerBasicIdentity)context.User.Identity;
+                if (!Authentication.VerifyAuthentication(identity)) { context.Response.SendResponse(JsonConvert.SerializeObject(Authentication.FailedAuthentication)); return context; }
+            }
+
             Process[] process = Process.GetProcesses();
 
             ActiveWindow activeWindow = new ActiveWindow();
@@ -271,16 +321,16 @@ namespace WindowsRestAPI
             var stringBuilder = new StringBuilder(intLength);
             if (GetWindowText(handle, stringBuilder, intLength) > 0)
             {
-                activeWindow.WindowName = stringBuilder.ToString();
+                activeWindow.WindowTitle = stringBuilder.ToString();
             }
             else
             {
-                activeWindow.WindowName = null;
+                activeWindow.WindowTitle = null;
             }
 
             foreach (Process p in process)
             {
-                if (p.MainWindowTitle.Contains(activeWindow.WindowName))
+                if (p.MainWindowTitle.Contains(activeWindow.WindowTitle))
                 {
                     activeWindow.ProcessName = p.ProcessName;
                     activeWindow.StartTime = p.StartTime.ToString();
@@ -303,12 +353,19 @@ namespace WindowsRestAPI
                 }
             }
 
+            context.Response.ContentEncoding = Encoding.Default;
             context.Response.SendResponse(JsonConvert.SerializeObject(activeWindow));
             return context;
         }
         [RestRoute(HttpMethod = HttpMethod.GET, PathInfo = "/sendmessage")]
         public IHttpContext SendMessage(IHttpContext context)
         {
+            if (Authentication.Enabled)
+            {
+                HttpListenerBasicIdentity identity = (HttpListenerBasicIdentity)context.User.Identity;
+                if (!Authentication.VerifyAuthentication(identity)) { context.Response.SendResponse(JsonConvert.SerializeObject(Authentication.FailedAuthentication)); return context; }
+            }
+
             ResponseMessage Response = new ResponseMessage();
             Response.Message = "Failed to parse message.";
             Response.Successful = false;
@@ -327,13 +384,19 @@ namespace WindowsRestAPI
                 Response.Message = "Failed to parse message.";
                 Response.Successful = false;
             }
-
+            context.Response.ContentEncoding = Encoding.Default;
             context.Response.SendResponse(JsonConvert.SerializeObject(Response));
             return context;
         }
         [RestRoute(HttpMethod = HttpMethod.GET, PathInfo = "/getprocesses")]
         public IHttpContext GetProcesses(IHttpContext context)
         {
+            if (Authentication.Enabled)
+            {
+                HttpListenerBasicIdentity identity = (HttpListenerBasicIdentity)context.User.Identity;
+                if (!Authentication.VerifyAuthentication(identity)) { context.Response.SendResponse(JsonConvert.SerializeObject(Authentication.FailedAuthentication)); return context; }
+            }
+
             Processes Processes = new Processes();
             Process[] process = Process.GetProcesses();
             foreach (Process p in process)
@@ -368,16 +431,39 @@ namespace WindowsRestAPI
                     Successful = false
                 };
             }
+            context.Response.ContentEncoding = Encoding.Default;
             context.Response.SendResponse(JsonConvert.SerializeObject(Processes));
             return context;
         }
         [RestRoute]
         public IHttpContext Main(IHttpContext context)
         {
-            ResponseMessage Response = new ResponseMessage();
-            Response.Message = "Welcome to Windows Rest API.";
-            Response.Successful = true;
-            context.Response.SendResponse(JsonConvert.SerializeObject(Response));
+            if (Authentication.Enabled)
+            {
+                HttpListenerBasicIdentity identity = (HttpListenerBasicIdentity)context.User.Identity;
+                if (!Authentication.VerifyAuthentication(identity)) { context.Response.SendResponse(JsonConvert.SerializeObject(Authentication.FailedAuthentication)); return context; }
+            }
+
+            ResponseMessage response = new ResponseMessage();
+            response.Message = "Welcome to Windows Rest API.";
+            response.Successful = true;
+
+            var _Response = new 
+            {
+                Reponse = response,
+                HostBindIP = Settings.Default.HostIP, 
+                Port = Settings.Default.Port, 
+                HTTPS = Settings.Default.HTTPS, 
+                StartServer = Settings.Default.StartServer, 
+                StartMinimized = Settings.Default.StartMinimized, 
+                Authentication = Settings.Default.Authentication, 
+                Username = Settings.Default.Username,
+                DetectedEncoding = Encoding.Default.EncodingName,
+                Version = Assembly.GetExecutingAssembly().GetName().Version.ToString()
+            };
+
+            context.Response.ContentEncoding = Encoding.Default;
+            context.Response.SendResponse(JsonConvert.SerializeObject(_Response));
             return context;
         }
     }

@@ -2,6 +2,7 @@
 using Microsoft.Toolkit.Uwp.Notifications;
 using System;
 using System.Drawing;
+using System.Net;
 using System.Windows.Forms;
 using WindowsRestAPI.Properties;
 
@@ -27,6 +28,7 @@ namespace WindowsRestAPI
         {
             InitializeComponent();
             DesktopNotificationManagerCompat.RegisterActivator<MyNotificationActivator.ThisNotificationActivator>();
+            notify.ContextMenuStrip = taskbarMenu;
         }
 
         public RestServer Rest;
@@ -39,6 +41,13 @@ namespace WindowsRestAPI
                     Rest = new RestServer();
                     Rest.Port = Settings.Default.Port;
                     Rest.Host = Settings.Default.HostIP;
+
+                    if (Authentication.Enabled)
+                    {
+                        Rest.Advanced.AuthenticationSchemes = AuthenticationSchemes.Basic;
+                    }
+                    Rest.UseHttps = Settings.Default.HTTPS;
+      
                     Rest.Start();
                     setRunningStatus();
                 }
@@ -64,6 +73,8 @@ namespace WindowsRestAPI
             picStatus.Image = Resources.icon_stop_15;
             btnStartStop.Text = "Start";
             btnStartStop.FlatAppearance.MouseOverBackColor = Color.Green;
+            mnuStartStop.Text = "Start";
+            mnuStatus.Text = "Status: Stopped";
         }
 
         public void setRunningStatus()
@@ -72,6 +83,8 @@ namespace WindowsRestAPI
             btnStartStop.Text = "Stop";
             if (btnStartStop.Text == "Stop")
             btnStartStop.FlatAppearance.MouseOverBackColor = Color.Red;
+            mnuStartStop.Text = "Stop";
+            mnuStatus.Text = "Status: Running";
         }
 
         private void Main_Load(object sender, EventArgs e)
@@ -104,16 +117,7 @@ namespace WindowsRestAPI
 
         private void btnExit_Click(object sender, EventArgs e)
         {
-            if (Rest is null)
-            {
-                Application.Exit();
-
-            }
-            else if (Rest.IsListening || Rest != null)
-            {
-                runServer(false);
-                Application.Exit();
-            }
+            ExitApplication();
         }
 
         private void Main_Resize(object sender, EventArgs e)
@@ -148,7 +152,36 @@ namespace WindowsRestAPI
 
         private void btnStartStop_Click(object sender, EventArgs e)
         {
-            if(Rest is null || !Rest.IsListening)
+            StartStopServer();
+        }
+
+        private void mnuStartStop_Click(object sender, EventArgs e)
+        {
+            StartStopServer();
+        }
+
+        private void mnuExit_Click(object sender, EventArgs e)
+        {
+            ExitApplication();
+        }
+        
+        private void ExitApplication()
+        {
+            if (Rest is null)
+            {
+                Application.Exit();
+
+            }
+            else if (Rest.IsListening || Rest != null)
+            {
+                runServer(false);
+                Application.Exit();
+            }
+        }
+        
+        private void StartStopServer()
+        {
+            if (Rest is null || !Rest.IsListening)
             {
                 runServer(true);
                 btnStartStop.FlatAppearance.MouseOverBackColor = Color.Red;
@@ -159,6 +192,5 @@ namespace WindowsRestAPI
                 btnStartStop.FlatAppearance.MouseOverBackColor = Color.Green;
             }
         }
-    
     }
 }

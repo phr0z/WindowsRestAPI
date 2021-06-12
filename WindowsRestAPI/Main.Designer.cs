@@ -36,7 +36,14 @@
             this.btnSettings = new System.Windows.Forms.Button();
             this.btnStartStop = new System.Windows.Forms.Button();
             this.picStatus = new System.Windows.Forms.PictureBox();
+            this.taskbarMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
+            this.mnuStatus = new System.Windows.Forms.ToolStripMenuItem();
+            this.mnuSeparator = new System.Windows.Forms.ToolStripSeparator();
+            this.mnuStartStop = new System.Windows.Forms.ToolStripMenuItem();
+            this.mnuExit = new System.Windows.Forms.ToolStripMenuItem();
             ((System.ComponentModel.ISupportInitialize)(this.picStatus)).BeginInit();
+            this.taskbarMenu.SuspendLayout();
             this.SuspendLayout();
             // 
             // btnExit
@@ -107,6 +114,48 @@
             this.picStatus.TabIndex = 6;
             this.picStatus.TabStop = false;
             // 
+            // taskbarMenu
+            // 
+            this.taskbarMenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.mnuStatus,
+            this.mnuSeparator,
+            this.mnuStartStop,
+            this.mnuExit});
+            this.taskbarMenu.Name = "taskbarMenu";
+            this.taskbarMenu.Size = new System.Drawing.Size(181, 98);
+            // 
+            // toolStripMenuItem1
+            // 
+            this.toolStripMenuItem1.Name = "toolStripMenuItem1";
+            this.toolStripMenuItem1.Size = new System.Drawing.Size(180, 22);
+            this.toolStripMenuItem1.Text = "toolStripMenuItem1";
+            // 
+            // mnuStatus
+            // 
+            this.mnuStatus.Enabled = false;
+            this.mnuStatus.Name = "mnuStatus";
+            this.mnuStatus.Size = new System.Drawing.Size(180, 22);
+            this.mnuStatus.Text = "Status: Running";
+            // 
+            // mnuSeparator
+            // 
+            this.mnuSeparator.Name = "mnuSeparator";
+            this.mnuSeparator.Size = new System.Drawing.Size(177, 6);
+            // 
+            // mnuStartStop
+            // 
+            this.mnuStartStop.Name = "mnuStartStop";
+            this.mnuStartStop.Size = new System.Drawing.Size(180, 22);
+            this.mnuStartStop.Text = "Start-Stop";
+            this.mnuStartStop.Click += new System.EventHandler(this.mnuStartStop_Click);
+            // 
+            // mnuExit
+            // 
+            this.mnuExit.Name = "mnuExit";
+            this.mnuExit.Size = new System.Drawing.Size(180, 22);
+            this.mnuExit.Text = "Exit";
+            this.mnuExit.Click += new System.EventHandler(this.mnuExit_Click);
+            // 
             // Main
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -130,6 +179,7 @@
             this.Load += new System.EventHandler(this.Main_Load);
             this.Resize += new System.EventHandler(this.Main_Resize);
             ((System.ComponentModel.ISupportInitialize)(this.picStatus)).EndInit();
+            this.taskbarMenu.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -141,6 +191,12 @@
         private System.Windows.Forms.Button btnSettings;
         private System.Windows.Forms.Button btnStartStop;
         private System.Windows.Forms.PictureBox picStatus;
+        private System.Windows.Forms.ContextMenuStrip taskbarMenu;
+        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem1;
+        private System.Windows.Forms.ToolStripMenuItem mnuStatus;
+        private System.Windows.Forms.ToolStripSeparator mnuSeparator;
+        private System.Windows.Forms.ToolStripMenuItem mnuStartStop;
+        private System.Windows.Forms.ToolStripMenuItem mnuExit;
     }
 }
 

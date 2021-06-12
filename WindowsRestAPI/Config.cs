@@ -49,13 +49,22 @@ namespace WindowsRestAPI
             Settings.Default.StartMinimized = chkStartMinimized.Checked;
             Settings.Default.StartServer = chkStartServer.Checked;
 
+            Settings.Default.HTTPS = chkHTTPS.Checked;
             Settings.Default.HostIP = txtHostIP.Text;
             Settings.Default.Port = numPort.Value.ToString();
 
             Settings.Default.MessageBox = rdoMessageBox.Checked;
             Settings.Default.NotificationCenter = rdoNotificationCenter.Checked;
 
+            Settings.Default.Authentication = chkAuth.Checked;
+            Authentication.Enabled = chkAuth.Checked;
+            Authentication.Username = txtUsername.Text;
+            Authentication.Password = Authentication.EncryptString(Authentication.ToSecureString(txtPassword.Text));
+            Settings.Default.Username = txtUsername.Text;
+            Settings.Default.Password = Authentication.EncryptString(Authentication.ToSecureString(txtPassword.Text));
+
             Settings.Default.Save();
+            Settings.Default.Reload();
             Close();
         }
 
@@ -71,8 +80,13 @@ namespace WindowsRestAPI
             rdoMessageBox.Checked = Settings.Default.MessageBox;
             rdoNotificationCenter.Checked = Settings.Default.NotificationCenter;
 
+            chkHTTPS.Checked = Settings.Default.HTTPS;
             txtHostIP.Text = Settings.Default.HostIP;
             numPort.Value = Convert.ToInt64(Settings.Default.Port);
+
+            chkAuth.Checked = Settings.Default.Authentication;
+            txtUsername.Text = Settings.Default.Username;
+            txtPassword.Text = Authentication.ToInsecureString(Authentication.DecryptString(Settings.Default.Password));
         }
 
         private void btnAddRun_Click(object sender, EventArgs e)
