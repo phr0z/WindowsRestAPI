@@ -4,13 +4,11 @@ A Windows Rest API app which allows you to control certain functions of Windows 
 
 ## Available features.
 - Switch audio output interfaces.
+- Adjust audio volume.
+- Get active application/window name.
 - Switch primary monitor.
+- List running processes.
 - Create list of executables and call and/or terminate them.
-
-## Ideas for feature implementations. (maybe)
-- HTTPS protocol.
-- Authentication.
-- Switch configuration framework
 
 ## Known issues.
 - Not every exception is handled. Errors will occur and pop up.
@@ -33,6 +31,13 @@ However it is not nice to elevate your priveleges everytime you run this program
 Instead we will configure a namespace reservation with the help of net sh. (note that it needs to be run in a elevated command prompt)
 
 `$ netsh http add urlacl url=http://+:1234/ user=DOMAIN\user`
+
+For HTTPS the following is needed.
+`$ netsh http add urlacl url=https://+:8443/ user=DOMAIN\user`
+`$ netsh http add sslcert ipport=0.0.0.0:8443 certhash=CERTIFICATETHUMBPRINT appid={1534ae42-9336-42f6-a6e8-350428d6f3c2}`
+
+Sidenote; Any certificate can be used. But you need to have the private key! (ie pfx exported with the key, so the included certificate will not work)
+
 
 Change user to your windows username. In case your running in a local environment, discard DOMAIN\
 List the ACL to see if it was added properly.
