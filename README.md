@@ -35,6 +35,7 @@ Instead we will configure a namespace reservation with the help of net sh. (note
 For HTTPS the following is needed.
 
 `$ netsh http add urlacl url=https://+:8443/ user=DOMAIN\user`
+
 `$ netsh http add sslcert ipport=0.0.0.0:8443 certhash=CERTIFICATETHUMBPRINT appid={1534ae42-9336-42f6-a6e8-350428d6f3c2}`
 
 Sidenote; Any certificate can be used. But you need to have the private key! (ie pfx exported with the key, so the included certificate will not work)
