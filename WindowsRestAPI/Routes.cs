@@ -224,6 +224,8 @@ namespace WindowsRestAPI
 
             Commands command = new Commands();
 
+            bool ApplicationIsRunning = false;
+
             foreach (string s in command.GetCommands())
             {
                 var decoded = command.Decoded(s.Trim());
@@ -231,18 +233,50 @@ namespace WindowsRestAPI
                 string appName = decoded.Name.ToLower();
                 string appPath = decoded.Path;
                 string appArguments = decoded.Arguments;
-                
+                string executableFilename = Path.GetFileName(appPath).Replace(".exe", "");
+
                 if (name.ToLower() == appName)
                 {
                     Process process = new Process();
-                    process.StartInfo.FileName = appPath;
-                    if(appArguments?.Length > 1)
+                    Process[] running = Process.GetProcesses();
+
+                    foreach (Process p in running)
                     {
-                        process.StartInfo.Arguments = appArguments;
+                        if (p.ProcessName.Contains(executableFilename))
+                        {
+                            try
+                            {
+                                ApplicationIsRunning = true; 
+                                Response.Message = $"Application is already running. {p.ProcessName}";
+                                Response.Successful = true;
+                            }
+                            catch (Exception e)
+                            {
+                                Response.Message = $"Failed to start process. {p.ProcessName} " + e.Message.ToString();
+                                Response.Successful = false;
+                            }
+                        }
                     }
-                    process.Start();
-                    Response.Message = $"Successfully launched application. {appName}";
-                    Response.Successful = true;
+
+                    if (!ApplicationIsRunning)
+                    {
+                        try
+                        {
+                            process.StartInfo.FileName = appPath;
+                            if (appArguments?.Length > 1)
+                            {
+                                process.StartInfo.Arguments = appArguments;
+                            }
+                            process.Start();
+                            Response.Message = $"Successfully launched application. {appName}";
+                            Response.Successful = true;
+                        }
+                        catch (Exception e)
+                        {
+                            Response.Message = $"Failed to start process. {decoded.Name} " + e.Message.ToString();
+                            Response.Successful = false;
+                        }
+                    }
                 }
             }
             context.Response.ContentEncoding = Encoding.Default;
